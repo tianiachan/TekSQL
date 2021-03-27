@@ -77,30 +77,12 @@ COMMIT;
 
 -- do not create foreign  key constraint
 /*** PROBLEM 3 - Data Querying Clauses and Joins ***/
-/* 
-	Big data! Well, relatively big. You will create table sales_orders and get to work analyzing. 
-    You're encouraged to experiment with using TEMPORARY tables in your analysis, but your final queries must not 
-    include them - you must only submit queries using the base sales_orders and item_details tables.
-	2. Load sales_orders with the raw data provided in pg2. You may write and leave the entire INSERT statement there.
-    
-    You will then write SQL queries answering the following (include the full question as a comment above your query). 
-    It's always assumed that sales_orders joins item_details on item_id. 
-    Line_item_total is the product of quantity and item_price.
-    Order_Total is the sum of line_item_totals for a given Order_no.
-    3. What is the total number of records in sales_orders? 
-    4. What is the total number of records of sales_orders INNER JOIN item_details? LEFT JOIN?
-    5. Return the order_no, order_date, and the order_total for the top 10 orders in August in descending order. (on order total)
-    6. Return the order_no, order_date, and the total quantity for orders HAVING a total quantity greater than 10.
-    7. Create stored procedure "total_sales_on_date" that returns total sales (in $) given a date.
-*/
-/*
-    1. Create table sales_orders with 5 columns: 
-		a. record_id, a Big Integer Primary Key that auto-increments with each new record added.
-        b. order_no, another Big Integer that cannot be NULL
-        c. order_date, DATE
-        d. item_id, formatted to match item_details.item_id from PROBLEM 2.
-        e. quantity, Big Integer
-*/
+/*1. Create table sales_orders with 5 columns: 
+	a. record_id, a Big Integer Primary Key that auto-increments with each new record added.
+	b. order_no, another Big Integer that cannot be NULL
+	c. order_date, DATE
+	d. item_id, formatted to match item_details.item_id from PROBLEM 2.
+	e. quantity, Big Integer*/
 DROP TABLE IF EXISTS sales_orders;
 CREATE TABLE IF NOT EXISTS sales_orders (
 	record_id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -115,6 +97,37 @@ CREATE TABLE IF NOT EXISTS sales_orders (
     Line_item_total is the product of quantity and item_price.
     Order_Total is the sum of line_item_totals for a given Order_no.
 */
+-- 3. What is the total number of records in sales_orders? 831
+SELECT COUNT(*) AS total_records FROM sales_orders;
+-- 4. What is the total number of records of sales_orders INNER JOIN item_details? LEFT JOIN?
+SELECT * FROM item_details;
+SELECT * FROM sales_orders;
+-- INNER JOIN, 828
+SELECT COUNT(*) AS total_records
+FROM sales_orders
+JOIN item_details
+    ON sales_orders.item_id = item_details.item_id;
+-- LEFT JOIN, 831
+SELECT COUNT(*) AS total_records
+FROM sales_orders
+LEFT JOIN item_details
+    ON sales_orders.item_id = item_details.item_id;
+-- 5. Return the order_no, order_date, and the order_total for the top 10 orders in August in descending order. (on order total)
+SELECT order_no, order_date, quantity * item_price AS order_total
+FROM sales_orders
+JOIN item_details 
+	ON sales_orders.item_id = item_details.item_id
+WHERE MONTH(order_date) = 8
+ORDER BY order_total DESC
+LIMIT 10;
+-- 6. Return the order_no, order_date, and the total quantity for orders HAVING a total quantity greater than 10.
+SELECT order_no, order_date, Sum(quantity) AS total_quantity
+FROM sales_orders
+JOIN item_details 
+	ON sales_orders.item_id = item_details.item_id
+GROUP BY order_no
+HAVING total_quantity > 10;
+-- 7. Create stored procedure "total_sales_on_date" that returns total sales (in $) given a date.
 
 
 
