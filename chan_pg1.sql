@@ -75,7 +75,6 @@ SELECT * FROM item_details;
 COMMIT;
 -- 9. SUGGESTION: To make debugging PROBLEM 3 easier, you may wish to make note of item_details record values as of Step 8, then TRUNCATE item_details and INSERT records to match those recorded values to have a reliable starting point.
 
--- do not create foreign  key constraint
 /*** PROBLEM 3 - Data Querying Clauses and Joins ***/
 /*1. Create table sales_orders with 5 columns: 
 	a. record_id, a Big Integer Primary Key that auto-increments with each new record added.
@@ -128,28 +127,34 @@ JOIN item_details
 GROUP BY order_no
 HAVING total_quantity > 10;
 -- 7. Create stored procedure "total_sales_on_date" that returns total sales (in $) given a date.
-
+DELIMITER //
+-- create procedure
+CREATE PROCEDURE total_sales_on_date ( IN date_requested DATE) 
+BEGIN
+	SELECT order_no, order_date, sum(quantity * item_price) AS order_total
+	FROM sales_orders 
+	JOIN item_details 
+		ON sales_orders.item_id = item_details.item_id
+    WHERE DATE(order_date) = DATE(date_requested);
+END //
+-- change delimiter back
+DELIMITER ;
+CALL total_sales_on_date('2019-08-05');
+-- drop if no longer need
+DROP PROCEDURE IF EXISTS total_sales_on_date;
 
 
 /*** PROBLEM 4 - Expanding a Dimension Table ***/
 /*
 	On the chan_pg4 page you are provided the beginnings of a Date Dimension table named date_dim.
-    
-    1. You must create a list in Excel of all dates from 7/1/2019 to 12/31/2019, 
-    in order to create the INSERT statement. Comment below with a description of what EXCEL
-    functions you used to create the data, copy-pasting the entire functions including the = sign
-    
-    2. You must then UPDATE date_dim to populate all the columns. You can find date conversion
-    functions for MySQL online.
-    
     Write a query joining date_dim onto sales_orders & item_details to answer the questions: 
     3. Sales ($) for each item_description broken down by day of the week.
 		Columns should be: Item Description, Day of Week, Sales Total
     4. Total Quantity Sold by Product by Quarter. Columns should be: Item_ID, Quarter YYYYMM, Total Quantity
 */
 
-#1. Comment here with what Excel functions you used to generate the test dataset.
-
+#1. Comment here with what Excel functions you used to generate the test dataset. You must create a list in Excel of all dates from 7/1/2019 to 12/31/2019, 
+/* =TEXT(DATE(2019,7,1) + ROW(1:1) -1,"(yyyy-mm-dd),") was used  to fill rows until 12/31/2019 */
 
 #2. Occurs entirely on chan_pg4
 
