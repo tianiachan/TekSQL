@@ -131,7 +131,7 @@ DELIMITER //
 -- create procedure
 CREATE PROCEDURE total_sales_on_date ( IN date_requested DATE) 
 BEGIN
-	SELECT order_no, order_date, sum(quantity * item_price) AS order_total
+	SELECT order_no, order_date, sum(quantity * item_price) AS sales_total
 	FROM sales_orders 
 	JOIN item_details 
 		ON sales_orders.item_id = item_details.item_id
@@ -154,13 +154,25 @@ DROP PROCEDURE IF EXISTS total_sales_on_date;
 */
 
 #1. Comment here with what Excel functions you used to generate the test dataset. You must create a list in Excel of all dates from 7/1/2019 to 12/31/2019, 
-/* =TEXT(DATE(2019,7,1) + ROW(1:1) -1,"(yyyy-mm-dd),") was used  to fill rows until 12/31/2019 */
-
+/* =TEXT(DATE(2019,7,1) + ROW(1:1) -1,"('yyyy-mm-dd'),") was used  to fill rows until 12/31/2019 */
 #2. Occurs entirely on chan_pg4
+#3. Sales ($) for each item_description broken down by day of the week. Columns should be: Item Description, Day of Week, Sales Total
+SELECT * FROM date_dim;
+SELECT * FROM sales_orders;
+SELECT * FROM item_details;
+SELECT item_description, TheDayOfWeekName, sum(quantity * item_price) AS sales_total
+FROM sales_orders
+JOIN item_details 
+	ON sales_orders.item_id = item_details.item_id
+LEFT JOIN date_dim
+	ON sales_orders.order_date = date_dim.TheDate
+GROUP BY order_date;
 
-
-#3. Please write query below. 
-
-
-#4. Please write query below.
-
+#4. Total Quantity Sold by Product by Quarter. Columns should be: Item_ID, Quarter YYYYMM, Total Quantity Please write query below.
+SELECT item_details.item_id, YYYYQQ, sum(quantity) AS total_quantity
+FROM sales_orders
+JOIN item_details 
+	ON sales_orders.item_id = item_details.item_id
+LEFT JOIN date_dim
+	ON sales_orders.order_date = date_dim.TheDate
+GROUP BY order_date;
