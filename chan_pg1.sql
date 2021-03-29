@@ -124,8 +124,9 @@ SELECT order_no, order_date, Sum(quantity) AS total_quantity
 FROM sales_orders
 JOIN item_details 
 	ON sales_orders.item_id = item_details.item_id
-GROUP BY order_no
-HAVING total_quantity > 10;
+WHERE total_quantity > 10;
+-- GROUP BY order_no
+-- HAVING total_quantity > 10;
 -- 7. Create stored procedure "total_sales_on_date" that returns total sales (in $) given a date.
 DELIMITER //
 -- create procedure
@@ -162,17 +163,17 @@ SELECT * FROM sales_orders;
 SELECT * FROM item_details;
 SELECT item_description, TheDayOfWeekName, sum(quantity * item_price) AS sales_total
 FROM sales_orders
-JOIN item_details 
+left JOIN item_details 
 	ON sales_orders.item_id = item_details.item_id
 LEFT JOIN date_dim
 	ON sales_orders.order_date = date_dim.TheDate
-GROUP BY order_date;
+GROUP BY TheDayOfWeekName;
 
 #4. Total Quantity Sold by Product by Quarter. Columns should be: Item_ID, Quarter YYYYMM, Total Quantity Please write query below.
-SELECT item_details.item_id, YYYYQQ, sum(quantity) AS total_quantity
+SELECT sales_orders.item_id, YYYYQQ, sum(quantity) AS total_quantity
 FROM sales_orders
-JOIN item_details 
+left JOIN item_details 
 	ON sales_orders.item_id = item_details.item_id
 LEFT JOIN date_dim
 	ON sales_orders.order_date = date_dim.TheDate
-GROUP BY order_date;
+GROUP BY YYYYQQ, ITEM_ID;
